@@ -96,7 +96,7 @@ To recompile a single file you should be able to specify:
 
 This is not intended for artists to have to type of course, but a step that the mesh export or editor tools could call.
 
-Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any generated outputs that are also inputs to other tasks, will cause those tasks to get run as well. So if `--package` was passed with a single .mesh being built, it would know that the .meshc output was an input to the next task, which would cause it to re-run.
+Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any generated outputs that are also inputs to other tasks, will cause those tasks to get run as well. So any .level files that reference .mesh outputs that changed, would also get re-run.
 
 Vapid does not generate a backwards-graph, like 'make' or other build systems. Instead it just runs tasks in order as they are specified in the configuration file, with the `dependencies` parameter specifying synchronization points for parallelism.
 
@@ -132,5 +132,6 @@ When run on a personal project level, you only need to run the build monitor, wh
 * This also captures all input and output filenames, so implicit dependencies and output filenames are tracked for that task.
 * The cache server serves the same purpose remotely as locally, comparing your file hashes against the previously run file hashes, and if they match, it uses this file, if not, it requests a build worker to build it.
 * This redirection allows the game tools integration to remain reading and writing in memory, by redirecting these file reads.
-* Vapid will use MD5 or another hash algorithm to determine if a file has changed for cache purposes, and also hashes the command line, so you can safely incrementally alter the configuration file.
+* Vapid will use timestamps to determine if an MD5 or another hash algorithm needs to run, which then determines if the file actually changed
+* Vapid hashes the command line, so you can safely incrementally alter the configuration file to cause incremental compiles.
 
