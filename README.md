@@ -129,7 +129,7 @@ There are four processes that need to run vapid at an enterprise level:
 * A cache server, which serves precompiled task outputs. This will be configured to store at least one cached output for each task, and store history up to a specific cache size.
 * A worker manager, which coordinates available workers
 * A dedicated worker, run one of these per core on every dedicated build machine you have, and connects to the worker manager.
-* A build monitor, this is a GUI program that runs on the user machine and remains active on the task bar, it connects to the cache server and worker manager. When you run a build, it then starts a bunch of worker processes locally, parses the build configuration, and starts requesting workers to perform tasks. This process also serves as a file watcher to determine fast incremental builds/
+* A build monitor, this is a GUI program that runs on the user machine and remains active on the task bar, it connects to the cache server and worker manager. When you run a build, it then starts a bunch of worker processes locally, parses the build configuration, and starts requesting workers to perform tasks. This process also serves as a file watcher to enable fast incremental builds.
 
 The build monitor may be triggered by a command line application for integration into code build tools, but you can see a GUI representation of the progress looking at the output.
 
