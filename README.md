@@ -88,6 +88,16 @@ if package:
   )
 ```
 
+# Implementation Details
+
+* The key to it working is it uses Microsoft Detours, a dependency-injection library to capture disk IO calls from a process.
+* Vapid then re-routes all IO traffic to read/write files over a network, allowing the compilation to be distributed while reading/writing from the host machine.
+* This also captures all input and output filenames, so implicit dependencies and output filenames are tracked for that task.
+* The cache server serves the same purpose remotely as locally, comparing your file hashes against the previously run file hashes, and if they match, it uses this file, if not, it requests a build worker to build it.
+* This redirection allows the game tools to hijack IO as well, so it can compile to/from memory.
+* Vapid will use timestamps to determine if an MD5 or another hash algorithm needs to run, which then determines if the file actually changed
+* Vapid hashes the command line, so you can safely incrementally alter the configuration file to cause incremental compiles.
+
 # Incremental Builds
 
 To recompile a single file you should be able to specify:
@@ -114,7 +124,7 @@ Or you might want to alter expensive global rules, like how lighting or terrain 
 
 A way to link vapid as a library into your game tools, to read the same rules script, and send temporary files into and out of the build system will be provided.
 
-# Implementation Details
+# Processes
 
 There are four processes that need to run vapid at an enterprise level:
 
@@ -126,12 +136,3 @@ There are four processes that need to run vapid at an enterprise level:
 The build monitor may be triggered by a command line application for integration into code build tools, but you can see a GUI representation of the progress looking at the output.
 
 When run on a personal project level, you only need to run the build monitor, which will then just ignore the cache server if not present (using a local cache), and use only the local build workers.
-
-* The key to it working is it uses Microsoft Detours, a dependency-injection library to capture disk IO calls from a process.
-* Vapid then re-routes all IO traffic to read/write files over a network, allowing the compilation to be distributed while reading/writing from the host machine.
-* This also captures all input and output filenames, so implicit dependencies and output filenames are tracked for that task.
-* The cache server serves the same purpose remotely as locally, comparing your file hashes against the previously run file hashes, and if they match, it uses this file, if not, it requests a build worker to build it.
-* This redirection allows the game tools integration to remain reading and writing in memory, by redirecting these file reads.
-* Vapid will use timestamps to determine if an MD5 or another hash algorithm needs to run, which then determines if the file actually changed
-* Vapid hashes the command line, so you can safely incrementally alter the configuration file to cause incremental compiles.
-
