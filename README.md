@@ -39,8 +39,15 @@ import vapid
 config = vapid.option('config', default='debug', help='What configuration to use when compiling')
 
 def make_cxx_exe(name, source)
-  objs = vapid.compile(run="cl /c $ /Fo:build/%s/$.obj" % (config), source=source)
-  vapid.link(run="link /Fo:build/%s/%s.exe $" % (config, name), source='build/%s/%s.obj' % (config, source), dependencies=[objs])
+  objs = vapid.compile(
+    run="cl /c $ /Fo:build/%s/$.obj" % (config), 
+    source=source
+  )
+  vapid.link(
+    run="link /Fo:build/%s/%s.exe $" % (config, name), 
+    source='build/%s/%s.obj' % (config, source), 
+    dependencies=[objs]
+  )
   
 make_cxx_exe('game.exe', 'source/game/**/*.cpp')
 make_cxx_exe('editor.exe', 'source/editor/**/*.cpp')
@@ -72,7 +79,11 @@ mesh = vapid.compile(run="meshc -i $ -o build/$c", source="content/meshes/**/*.m
 levels = vapid.compile(run="levelc -i $ -o build/$c", source="content/levels/**/*.level", dependencies=[mesh])
 
 if package: 
-  vapid.link(run="7z a assets.7z $", source=["build/content/**/*", "build_%s/content/**/*" % (platform)], dependencies=[tga_textures, png_textures, audio, mesh, levels])
+  vapid.link(
+    run="7z a assets.7z $",
+    source=["build/content/**/*", "build_%s/content/**/*" % (platform)],
+    dependencies=[tga_textures, png_textures, audio, mesh, levels]
+  )
 ```
 
 # Incremental Builds
