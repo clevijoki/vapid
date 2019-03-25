@@ -6,7 +6,7 @@ The very basic problem of making sure your build system has a fast start up time
 
 But, if these issues of building at a massive scale can be solved for a content build system, then it will be shrug off even the most demanding code build needs.
 
-Build systems are also not very sexy. Despite the incredible power and productivity impacts, the inherent hard problems they need to solve end up with hard interfaces to learn in order to use them, making all but the most technical people avoid until absolutely necessary.
+Build systems are also not very sexy. Despite the incredible power and productivity impacts they have, the inherent hard problems they need to solve end up with inherently hard interfaces to learn in order to use them, making most people avoid learning anything about them.
 
 This is where the name 'vapid' comes from. It should be dumb enough that you should be able to learn the gist of it by a glance at the configuration file. And it sounds like 'rapid' which is a good build system quality to have.
 
