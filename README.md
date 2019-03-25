@@ -46,9 +46,9 @@ make_cxx_exe('editor.exe', 'source/editor/**/*.cpp')
 ```
 
 This should compile all of the cpp files from the source folder and link into two executables. Vapid contains three functions:
-`option` - Specify a compiler option for vapid to parse.
-`compile` - the rule is called for every file in source.
-`link` - the rule is called once, with $ being all of the input files in separate arguments.
+* `option` - Specify a compiler option for vapid to parse.
+* `compile` - the rule is called for every file in source.
+* `link` - the rule is called once, with $ being all of the input files in separate arguments.
 
 These functions return an identifier for this task which can be passed as a dependency of a later rule, which allows vapid to run these tasks in parallel.
 
