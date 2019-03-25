@@ -90,29 +90,27 @@ if package:
 
 # Implementation Details
 
-* The key to it working is it uses Microsoft Detours, a DLL-injection library, which will be used to capture all relevant API calls from a compiler process.
+* The key to it working is Microsoft Detours, a DLL-injection library, which will be used to capture all relevant API calls from a compiler process.
 * Vapid then re-routes all IO traffic to read/write files over a network, allowing the compilation to be distributed while reading/writing from the host machine.
 * This also captures all input and output filenames, so implicit dependencies and output filenames are tracked for that task.
 * The cache server serves the same purpose remotely as locally, comparing your file hashes against the previously run file hashes, and if they match, it uses this file, if not, it requests a build worker to build it.
 * This redirection allows the game tools to hijack IO as well, so it can compile to/from memory.
-* Vapid will use timestamps to determine if an MD5 or another hash algorithm needs to run, which then determines if the file actually changed
-* Vapid hashes the command line, so you can reliably alter the configuration file to cause incremental compiles.
+* Timestamps determine if an MD5 or another hash algorithm needs to run, which then determines if the file actually changed.
+* The rule command lines are also hashed, so you can reliably alter the configuration file to cause incremental compiles.
+* A file watcher will run to check for files that change locally so incremental builds may be started quickly.
 
 # Incremental Builds
 
-To recompile a single file you should be able to specify:
+To recompile a single file, the file just needs to be saved, and you can immediately start a build. A file watcher tracks all of the changes to the source folders, making this process of discovery instantaneous.
 
-`vapid content/meshes/wall.mesh`
-
-This is not intended for artists to have to type of course, but a step that the mesh export or editor tools could call.
-
-Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any generated outputs that are also inputs to other tasks, will cause those tasks to get run as well. So any .level files that reference .mesh outputs that changed, would also get re-run.
-
-Vapid does not generate a backwards-graph, like 'make' or other build systems. Instead it just runs tasks in order as they are specified in the configuration file, with the `dependencies` parameter specifying synchronization points for parallelism.
+Vapid does not generate a backwards-graph, like 'make' or other build systems. Instead it just runs tasks in order as they are specified in the configuration file, with the `dependencies` parameter specifying synchronization points so the rest of the tasks can run in parallel.
 
 A backwards graph is faster for full builds, but for content builds this is not what we care about 99% of the time. Vapid achieves fast full build times through distributed compiling and caching.
 
-This forward-declaration syntax is also what allows the build system syntax to be so simple. Part of the reason I think so many people do not like to touch build systems configuration files is the inherent friction between wanting to declare things in a forward syntax (compile my .cpp file into an obj and link it with the game!) vs how you actually get that to happen (my game.exe link step depends on an .obj file, that obj is produced by a link step which depends on my .cpp file).
+This forward-declaration syntax is also what allows the build system syntax to be so simple. Part of the reason I think so many people do not like to touch build system configuration files is the inherent friction between wanting to declare things in a forward syntax:
+* compile my .cpp file into an obj and link it with the game.
+vs how you actually get that to happen:
+* my game.exe link step depends on an .obj file, that obj is produced by a link step which depends on my .cpp file.
 
 # Game Tools Integration
 
@@ -131,8 +129,17 @@ There are four processes that need to run vapid at an enterprise level:
 * A cache server, which serves precompiled task outputs. This will be configured to store at least one cached output for each task, and store history up to a specific cache size.
 * A worker manager, which coordinates availble workers
 * A dedicated worker, run one of these per core on every dedicated build machine you have, and connects to the worker manager.
-* A build monitor, this is a GUI program that runs on the user machine and remains active on the task bar, it connects to the cache server and worker manager. When you run a build, it then starts a bunch of worker processes locally, parses the build configuration, and starts requesting workers to perform tasks. This may also be configured to use a couple cores of the user machines to perform build tasks for anybody at the company if desired, possibly only activating this when the machine has been idle for a while. This may be an increasingly viable option as many core systems are becoming available (e.g. threadripper).
+* A build monitor, this is a GUI program that runs on the user machine and remains active on the task bar, it connects to the cache server and worker manager. When you run a build, it then starts a bunch of worker processes locally, parses the build configuration, and starts requesting workers to perform tasks. This process also serves as a file watcher to determine fast incremental builds/
 
 The build monitor may be triggered by a command line application for integration into code build tools, but you can see a GUI representation of the progress looking at the output.
 
 When run on a personal project level, you only need to run the build monitor, which will then just ignore the cache server if not present (using a local cache), and use only the local build workers.
+
+# Build Monitor+
+
+Some additional goals for the build monitor will be to make it serve as a general purpose utility:
+
+* Indexes all of your text files so you can quickly search all of your code/content for text strings. 
+* Monitors for local changes that are not in source control, to catch potential build or check-in issues.
+* A GUI to sync builds from source control
+* Provide a way to safely check-in changelists that are validated to not break tests, so the build remains stable.
