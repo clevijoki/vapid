@@ -75,14 +75,15 @@ png_textures = vapid.compile(run="texc -i $ -o build/$.dds", source="content/tex
 # note only audio has to be encoded differently per platform
 audio = vapid.compile(run="wavc -p %s -i $ -o build_%s/$c" % (platform, out_dir), source="content/audio/**/*.wav")
 mesh = vapid.compile(run="meshc -i $ -o build/$c", source="content/meshes/**/*.mesh")
-# levels may reference meshes, and depend on mesh output files
+# levels may reference meshes, and depend on mesh output files, also writess a .deps file which tells what files we need for runtime to function
 levels = vapid.compile(run="levelc -i $ -o build/$c", source="content/levels/**/*.level", dependencies=[mesh])
+used_files = vapid.link(run="merge_files -o build/content/referenced_files.txt $", source="build/levels/**/*.deps", dependencies=[levels])
 
 if package: 
   vapid.link(
-    run="7z a assets.7z $",
-    source=["build/content/**/*", "build_%s/content/**/*" % (platform)],
-    dependencies=[tga_textures, png_textures, audio, mesh, levels]
+    run="7z a assets.7z @$",
+    source='build/content/referenced_files.txt',
+    dependencies=[tga_textures, png_textures, audio, mesh, levels, used_files]
   )
 ```
 
