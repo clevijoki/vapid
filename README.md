@@ -2,7 +2,7 @@
 
 Content builds for video games stress every aspect of a build system. They involve hundreds of gigabytes of data, hundreds of thousands of files, and have dozens of compiler steps that chain together to produce outputs, each with multiple inputs and outputs. The end users are non-programmers (artists and designers) and require easy to read progress and error messages.
 
-The very basic problem of making sure your build system has a fast start up time for an incremental build (e.g. a user changes a single file) is complicated when you have to parse 300k input/output files totaling 500 gb to see if they have changed to find that single file to compile, which is how most build systems work. The fastest SSD can still take minutes to perform this step. This is a non-issue on the even the largest code base and hence why current build systems are not capable of this task
+The very basic problem of making sure your build system has a fast start up time for an incremental build (e.g. a user changes a single file) is complicated when you have to parse 300k input/output files totaling 500 gb to see if they have changed to find that single file to compile, which is how most build systems work. The fastest SSD can still take minutes to perform this step. This is a non-issue on the even the largest code base and hence why current code build systems are not capable of this task.
 
 But, if these issues of building at a massive scale can be solved for a content build system, then it will be shrug off even the most demanding code build needs.
 
@@ -16,15 +16,16 @@ This is where the name 'vapid' comes from. It should be dumb enough that you sho
 * Distributed Building. It can take 4-24 hours to build content for a AAA game on a single machine, being able to throw machines at this to reduce compile times should be an option.
 * Cached Compiling. Most content does not change every compile, users updating to the latest content at the start of the day, with no local changes, should be able to simply download the current build. This can also take a big bite into that 4-24 hour content build time. A very robust caching system could also serve as a solution for distributing daily builds to a team, and ensuring they are always in sync with code and content (a recurring issue at every game company).
 * No Extra work to find implicit dependencies. Having to write separate processes to scan for implicit dependencies is extermely error prone, and slows the build down overall 
-* Prioritize iteration time over full-build time. Most users operate on one file of the build system, not all of them. Full build times are expected to be improved just by the distribution and cached aspects.
+* Prioritize incremental build over full-build time. Most users operate on one file of the build system, not all of them. Full build times are expected to be improved just by the distribution and cached aspects. Incremental will remain reliable and prioritized because full builds are treated as a subset of incremental builds.
 * Robust GUI based progress/error solution. This is specific to content users, but when builds take a while users need to know what is taking so long, and if errors occur, they need to be highlighed in a direct an obvious manner so they know what action needs to be taken. There should be 'share in slack' buttons for errors when people can't figure out why their build is broken which posts all of the required information.
+* Embed into tools
 * Learn it in 15 minutes. No custom configuration language, and prefer simple syntax over features.
 
 # What about other existing open source build systems?
 
 Before this undertaking I spent a lot of time evaluating existing open source build systems, and seeing how they would work with games my company is working on. But all of them are focused on building code, not content, and are missing critical features as a result.
 
-The biggest problem with existing build systems is you need full support for implicit dependencies. Code build systems generally have a /showIncludes support to query implicit dependencies from a C++ file as some sort of reluctant hack added later on during their development. But this breaks down when those dependencies are generated, which is often the case with content in several stages.
+The biggest problem with existing build systems is you need full support for implicit dependencies. Code build systems generally have a /showIncludes support to query implicit dependencies from a C++ file as some sort of reluctant hack added later on during their development. But this breaks down when those dependencies are generated, which is often the case with content. 
 
 At work we currently use WAF, which is missing almost every core feature I desire from vapid, but is still the only open source build system that I know of that has implicit dependency support that is robust enough to handle content builds.
 
@@ -80,7 +81,7 @@ To recompile a single file you should be able to specify:
 
 `vapid content/meshes/wall.mesh`
 
-This is not intended for artists to have to type of course, but a step that the mesh export tools could call.
+This is not intended for artists to have to type of course, but a step that the mesh export or editor tools could call.
 
 Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any previous tasks that read the outputs from this task (.level files) will also be re-run. Any tasks that might have to re-run because they reference the output paths explicitly will also run (e.g. if `--package` was specified, and a new .mesh was added, it would get packaged) 
 
@@ -89,6 +90,16 @@ Vapid does not generate a backwards-graph, like 'make' or other build systems. I
 A backwards graph is faster for full builds, but for content builds this is not what we care about 99% of the time. Vapid achieves fast full build times through distributed compiling and caching.
 
 This forward-declaration syntax is also what allows the build system syntax to be so simple. Part of the reason I think so many people do not like to touch build systems configuration files is the inherent friction between wanting to declare things in a forward syntax (compile my .cpp file into an obj and link it with the game!) vs how you actually get that to happen (my game.exe link step depends on an .obj file, that obj is produced by a link step which depends on my .cpp file).
+
+# Game Tools Integration
+
+If you were to have vapid part of your game tools, then you should be able to compile from an in-memory representation of your files. When a designer edits a level, the tools should internally be able to call the build system to propagate changes with the same reliable manner that you get from a stand alone compile, and propagate changes down the line.
+
+For example, you might place a building, which then writes to some vegetaion occlusion map, which modifies how vegetation is placed so it doesn't overlap with the building. Then the artist may not actually want to save these changes and so the vegetation should return to the existing state.
+
+Or you might want to alter expensive global rules, like how lighting or terrain erosion is calculated, and see the results as interactively as possible, still running all of the erosion through remote build machines.
+
+A way to link vapid as a library into your game tools, to read the same rules script, and send temporary files into and out of the build system will be provided.
 
 # Implementation Details
 
@@ -107,5 +118,6 @@ When run on a personal project level, you only need to run the build monitor, wh
 * Vapid then re-routes all IO traffic to read/write files over a network, allowing the compilation to be distributed while reading/writing from the host machine.
 * This also captures all input and output filenames, so implicit dependencies and output filenames are tracked for that task.
 * The cache server serves the same purpose remotely as locally, comparing your file hashes against the previously run file hashes, and if they match, it uses this file, if not, it requests a build worker to build it.
+* This redirection allows the game tools integration to remain reading and writing in memory, by redirecting these file reads.
 * Vapid will use MD5 or another hash algorithm to determine if a file has changed for cache purposes, and also hashes the command line, so you can safely incrementally alter the configuration file.
 
