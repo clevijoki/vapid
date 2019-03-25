@@ -76,9 +76,11 @@ if package:
 
 # Incremental Builds
 
-To recompile a texture you should be able to specify:
+To recompile a single file you should be able to specify:
 
 `vapid content/meshes/wall.mesh`
+
+This is not intended for artists to have to type of course, but a step that the mesh export tools could call.
 
 Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any previous tasks that read the outputs from this task (.level files) will also be re-run. Any tasks that might have to re-run because they reference the output paths explicitly will also run (e.g. if `--package` was specified, and a new .mesh was added, it would get packaged) 
 
