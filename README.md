@@ -75,15 +75,16 @@ png_textures = vapid.compile(run="texc -i $ -o build/$.dds", source="content/tex
 # note only audio has to be encoded differently per platform
 audio = vapid.compile(run="wavc -p %s -i $ -o build_%s/$c" % (platform, out_dir), source="content/audio/**/*.wav")
 mesh = vapid.compile(run="meshc -i $ -o build/$c", source="content/meshes/**/*.mesh")
-# levels may reference meshes, and depend on mesh output files, also writess a .deps file which tells what files we need for runtime to function
+# levels may reference meshes, and depend on mesh output files, also write a .deps file which tells what files we actually reference
 levels = vapid.compile(run="levelc -i $ -o build/$c", source="content/levels/**/*.level", dependencies=[mesh])
-used_files = vapid.link(run="merge_files -o build/content/referenced_files.txt $", source="build/levels/**/*.deps", dependencies=[levels])
 
 if package: 
+  referenced_file_list = vapid.link(run="merge_files -o build/content/referenced_files.txt $", source="build/levels/**/*.deps", dependencies=[levels])
+  
   vapid.link(
     run="7z a assets.7z @$",
     source='build/content/referenced_files.txt',
-    dependencies=[tga_textures, png_textures, audio, mesh, levels, used_files]
+    dependencies=[tga_textures, png_textures, audio, mesh, levels, referenced_file_list]
   )
 ```
 
@@ -95,7 +96,7 @@ To recompile a single file you should be able to specify:
 
 This is not intended for artists to have to type of course, but a step that the mesh export or editor tools could call.
 
-Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any previous tasks that read the outputs from this task (.level files) will also be re-run. Any tasks that might have to re-run because they reference the output paths explicitly will also run (e.g. if `--package` was specified, and a new .mesh was added, it would get packaged) 
+Vapid will match this file path against all of the rules that were specified, which should be nearly instantanous from a user perspective, and call any rules affected. Any generated outputs that are also inputs to other tasks, will cause those tasks to get run as well. So if `--package` was passed with a single .mesh being built, it would know that the .meshc output was an input to the next task, which would cause it to re-run.
 
 Vapid does not generate a backwards-graph, like 'make' or other build systems. Instead it just runs tasks in order as they are specified in the configuration file, with the `dependencies` parameter specifying synchronization points for parallelism.
 
