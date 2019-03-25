@@ -38,19 +38,19 @@ import vapid
 
 config = vapid.option('config', default='debug', help='What configuration to use when compiling')
 
-def make_cxx_exe(name, source)
+def make_exe(name, source)
   objs = vapid.compile(
     run="cl /c $ /Fo:build/%s/$.obj" % (config), 
     source=source
   )
   vapid.link(
-    run="link /Fo:build/%s/%s.exe $" % (config, name), 
+    run="link /Fo:build/%s/%s $" % (config, name), 
     source='build/%s/%s.obj' % (config, source), 
     dependencies=[objs]
   )
   
-make_cxx_exe('game.exe', 'source/game/**/*.cpp')
-make_cxx_exe('editor.exe', 'source/editor/**/*.cpp')
+make_exe('game.exe', 'source/game/**/*.cpp')
+make_exe('editor.exe', 'source/editor/**/*.cpp')
 ```
 
 This should compile all of the cpp files from the source folder and link into two executables. Vapid contains three functions:
