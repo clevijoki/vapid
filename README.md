@@ -33,7 +33,7 @@ At work we currently use WAF, which is missing almost every core feature I desir
 
 Since the goal is to learn how to use vapid in a glance of the configuration script, this is a configuration script:
 
-```
+```python
 import vapid
 
 config = vapid.option('config', default='debug', help='What configuration to use when compiling')
@@ -64,7 +64,7 @@ Because the configuration script is just python, all other support, like release
 
 For content builds, it could look like:
 
-```
+```python
 import vapid
 
 package = vapid.option('package', default=False, help='Should package assets into distribtion archives')
