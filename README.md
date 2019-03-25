@@ -1,6 +1,6 @@
 # VAPID - Stupid Fast Build System
 
-Content builds for video games stress every aspect of a build system. They involve hundreds of gigabytes of data, hundreds of thousands of files, and have dozens of compiler steps that chain together to produce outputs, each with multiple inputs and outputs. The end users are non-programmers (artists and designers) and require easy to read progress and error messages.
+Content builds for video games stress every aspect of a build system. They involve hundreds of gigabytes of data, hundreds of thousands of files, and have dozens of compiler steps that chain together to produce outputs, each with multiple inputs and outputs. The end users are non-programmers (artists and designers) and require easy to read progress and error messages and get irritated when things just seem to sit there for several minutes with no feedback.
 
 The very basic problem of making sure your build system has a fast start up time for an incremental build (e.g. a user changes a single file) is complicated when you have to parse 300k input/output files totaling 500 gb to see if they have changed to find that single file to compile, which is how most build systems work. The fastest SSD can still take minutes to perform this step. This is a non-issue on the even the largest code base and hence why current code build systems are not capable of this task.
 
