@@ -12,10 +12,10 @@ This is where the name 'vapid' comes from. It should be dumb enough that you sho
 
 # Core Design Goals
 
-* Windows as a primary platform. Almost all AAA game development happens on windows, yet most build system development seems to  happens on Linux.
+* Windows as a primary platform. Almost all AAA game development happens on windows, yet most intriguing build system development seems to happens on Linux.
 * Distributed Building. It can take 4-24 hours to build content for a AAA game on a single machine, being able to throw machines at this to reduce compile times should be an option.
-* Cached Compiling. Most content does not change every compile, users updating to the latest content at the start of the day, with no local changes, should be able to simply download the current build. This can also take a big bite into that 4-24 hour content build time. A very robust caching system could also serve as a solution for distributing daily builds to a team, and ensuring they are always in sync with code and content (a recurring issue at every game company).
-* No Extra work to find implicit dependencies. Having to write separate processes to scan for implicit dependencies is extermely error prone, and slows the build down overall 
+* Cached Compiling. Most content does not change every compile, artists and designers updating to the latest content at the start of the day, with no local changes, should be able to simply download the current build. A very robust caching system could also serve as a solution for distributing daily builds to a team, and ensuring they are always in sync with code and content (a recurring issue at every game company I have worked at).
+* No extra work to find implicit dependencies. Having to write separate processes to scan for implicit dependencies is extermely error prone, and slows the build down overall by just doing extra work that isn't building.
 * Prioritize incremental build over full-build time. Most users operate on one file of the build system, not all of them. Full build times are expected to be improved just by the distribution and cached aspects. Incremental will remain reliable and prioritized because full builds are treated as a subset of incremental builds.
 * Robust GUI based progress/error solution. This is specific to content users, but when builds take a while users need to know what is taking so long, and if errors occur, they need to be highlighed in a direct an obvious manner so they know what action needs to be taken. There should be 'share in slack' buttons for errors when people can't figure out why their build is broken which posts all of the required information.
 * Embed into tools. If you want to change some expensive global changes, like adjust baked lighting settings, why not leverage a build farm to do that?
@@ -55,12 +55,12 @@ make_cxx_exe('editor.exe', 'source/editor/**/*.cpp')
 
 This should compile all of the cpp files from the source folder and link into two executables. Vapid contains three functions:
 * `option` - Specify a compiler option for vapid to parse.
-* `compile` - the rule is called for every file in source.
-* `link` - the rule is called once, with $ being all of the input files in separate arguments.
+* `compile` - The rule is called for every file in source.
+* `link` - The rule is called once, with $ being all of the input files in separate arguments.
 
-These functions return an identifier for this task which can be passed as a dependency of a later rule, which allows vapid to run these tasks in parallel.
+These rule functions return an identifier for this task which can be passed as a dependency of a later rule, which allows vapid to run these tasks in parallel.
 
-Because the configuration script is just python, all other support, like release/debug builds, unity builds, include paths, and platform support will need to be implemented in the python script itself. This is intended to be done by wrapping these vapid calls in functions that would generate the command line itself, like in the above example.
+Because the configuration script is just python, all other support, like release/debug builds, unity builds, include paths, and platform support will need to be implemented in the python script itself.
 
 For content builds, it could look like:
 
