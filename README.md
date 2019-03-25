@@ -90,7 +90,7 @@ if package:
 
 # Implementation Details
 
-* The key to it working is it uses Microsoft Detours, a dependency-injection library to capture disk IO calls from a process.
+* The key to it working is it uses Microsoft Detours, a DLL-injection library, which will be used to capture all relevant API calls from a compiler process.
 * Vapid then re-routes all IO traffic to read/write files over a network, allowing the compilation to be distributed while reading/writing from the host machine.
 * This also captures all input and output filenames, so implicit dependencies and output filenames are tracked for that task.
 * The cache server serves the same purpose remotely as locally, comparing your file hashes against the previously run file hashes, and if they match, it uses this file, if not, it requests a build worker to build it.
