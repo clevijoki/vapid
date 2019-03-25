@@ -18,7 +18,7 @@ This is where the name 'vapid' comes from. It should be dumb enough that you sho
 * No Extra work to find implicit dependencies. Having to write separate processes to scan for implicit dependencies is extermely error prone, and slows the build down overall 
 * Prioritize incremental build over full-build time. Most users operate on one file of the build system, not all of them. Full build times are expected to be improved just by the distribution and cached aspects. Incremental will remain reliable and prioritized because full builds are treated as a subset of incremental builds.
 * Robust GUI based progress/error solution. This is specific to content users, but when builds take a while users need to know what is taking so long, and if errors occur, they need to be highlighed in a direct an obvious manner so they know what action needs to be taken. There should be 'share in slack' buttons for errors when people can't figure out why their build is broken which posts all of the required information.
-* Embed into tools
+* Embed into tools. If you want to change some expensive global changes, like adjust baked lighting settings, why not leverage a build farm to do that?
 * Learn it in 15 minutes. No custom configuration language, and prefer simple syntax over features.
 
 # What about other existing open source build systems?
