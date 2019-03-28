@@ -1,0 +1,18 @@
+{
+	"build_systems":
+	[
+		{
+			"name":"main",
+			"cmd": ["build.bat", "debug"],
+		}	
+	],
+	"folders":
+	[
+		{
+			"folder_exclude_patterns":[
+				"build"
+			],
+			"path": "."
+		}
+	]
+}

@@ -1,0 +1,40 @@
+Terminology:
+
+Executables:
+
+1. Cache Server. 
+	* This can retrieve a list of dependencies (rule + deps[filenames/hashes]) for a specific filename/hash combo.
+	This also maintains a list of build slaves to serve to users.
+
+2. Build Worker
+	* A build worker has a set number of child processes it is allowed to create.	
+	* Spawns processes with DLL injection to redirect reads to the build monitors that request tasks
+	Connects to Cache server to add itself to a list.
+
+3. Build Monitor. 
+	This parses the build 
+
+	This starts a file watcher, which checks / hashes / indexes files as they are modified, and retrives the dep info from the cache server. Any file with a difference is flagged as requiring a build.
+
+	The build monitor is also the server for files on the user machine.
+
+	Build monitors can start local build worker processes, spawns processes that have DLL injection that leaves all reads local but tracks file accesses.
+
+	Build monitors can also spawn remote worker processes, if the computer is idle, according to settings. This remote worker is terminated when a local build begins.
+
+	The build monitor may be executed with command line parameters to "ping" itself to start building, and be scripted with commands that way.
+
+	The build monitor may create the following windows:
+	- Build
+		Menu: Start / Cancel buttons
+		Tabs:
+			Progress Window (An incredibuild style progress window, all tasks should be clickable to find build reasons)
+			Errors Window
+			Console Window (shows commands)
+	- Find (Index all content with specific extensions when hashing)
+
+
+Process of starting a build
+
+The build monitor is pinged to start building.
+It finishes scanning content, and/or starts 
